@@ -38,7 +38,7 @@ function writeFile(path, contents, cb) {
 var parseAllProducts = function(data, err){
     var json = JSON.parse(data);
     if(json.Result.Product !== null){
-        //console.log("{products_known: "+json.Result.Product.length+"}");
+        console.log("{products_known: "+json.Result.Product.length+"}");
         to_process = json.Result.Product.length;
         json.Result.Product.forEach(element => {
             requestMainboardJSON(element.PDId, element.PDHashedId, element.PDName);
@@ -62,18 +62,18 @@ var requestMainboardJSON = function(id, hash, name){
                     //console.log(file); //E: Metadata
                     var fileFolder = mainboard_folder + "/"+element.Name+"/"+file.Title.replace(/\//g, "-").replace(/ /g, "_").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
                     var filePath = fileFolder+"/description.json";
-                    //console.log("writing "+filePath);
+                    console.log("writing "+filePath);
                     writeFile(filePath, JSON.stringify(file));
         
                     downloadSize += bytes(file.FileSize.replace("Bytes","B"));
                     //TODO test if 'China' has different binaries than 'Global'?
 
-                    //console.log("Queing "+file.DownloadUrl.Global+" for download");
+                    console.log("Queing "+file.DownloadUrl.Global+" for download");
                     var download = {
                         remote: file.DownloadUrl.Global,
                         local: fileFolder+"/"+file.Id.replace(/\//g, "-").replace(/ /g, "_").replace(/\(/g, "\(").replace(/\)/g, "\)")
                     }
-                    var curl_command = "curl --progress-bar \""+download.remote+"\" -o \""+download.local+"\"";
+                    var curl_command = "wget -c --verbose \""+download.remote+"\" -O \""+download.local+"\"";
                     fs.appendFile(download_file,curl_command+"\n", function (err) {
                         if (err) throw err;
                     });
@@ -81,7 +81,7 @@ var requestMainboardJSON = function(id, hash, name){
             });
            console.log("Queued "+bytes(downloadSize, {unitSeparator: ' '})+ " of firmware so far");
         } else {
-            //console.log("could not fetch download list. Maybe no downloads exists");
+            console.log("could not fetch download list. Maybe no downloads exists");
         }
     }
 
